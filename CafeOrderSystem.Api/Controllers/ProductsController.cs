@@ -1,6 +1,8 @@
 ﻿using CafeOrderSystem.Api.Data;
 using CafeOrderSystem.Api.DTOs;
 using CafeOrderSystem.Api.Models;
+using CafeOrderSystem.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,110 +12,113 @@ namespace CafeOrderSystem.Api.Controllers
     [Route("api/[controller]")]
     public class ProductsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IProductService _service;
 
-        public ProductsController(AppDbContext context)
+        public ProductsController(IProductService service)
         {
-            _context = context;
+            _service = service;
         }
 
         // GET: api/products
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts()
+        public async Task<ActionResult<ProductDto>> GetProducts()
         {
-            var products = await _context.Products
-                .Select(p => new ProductDto
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    Description = p.Description,
-                    Price = p.Price,
-                    Category = p.Category,
-                    ImageUrl = p.ImageUrl
-                })
-                .ToListAsync();
+            var products = await _service.GetAllAsync();
+            if (products == null)
+            {
+                return NotFound(new 
+                { 
+                    success = false, 
+                    message = "Product not found" }
+                );
+            }
 
-            return Ok(products);
+            return Ok(new
+            {
+                success = true,
+                data = products
+            });
         }
 
         // GET: api/products/id
         [HttpGet("{id}")]
-        public async Task<ActionResult<ProductDto>> GetProduct(int id)
+        public async Task<ActionResult<ProductDto>> GetById(int id)
         {
-            var product = await _context.Products
-                .Where(p => p.Id == id)
-                .Select(p => new ProductDto
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    Description = p.Description,
-                    Price = p.Price,
-                    Category = p.Category,
-                    ImageUrl = p.ImageUrl
-                })
-                .FirstOrDefaultAsync();
-
+            var product = await _service.GetByIdAsync(id);
             if (product == null)
-                return NotFound();
-
-            return Ok(product);
+            {
+                return NotFound(new
+                {
+                    success = false,
+                    message = $"Product with ID {id} not found",
+                    id = id
+                });
+            }
+            return Ok(new
+            {
+                success = true,
+                data = product
+            });
         }
 
         // POST: api/products
+        [Authorize(Roles = "Admin")]
         [HttpPost]
-        public async Task<ActionResult<ProductDto>> CreateProduct([FromBody] ProductDto dto)
+        public async Task<ActionResult<ProductDto>> Create(CreateProductDto dto)
         {
-            var product = new Product
+            var product = await _service.CreateAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = product.Id }, new
             {
-                Name = dto.Name,
-                Description = dto.Description,
-                Price = dto.Price,
-                Category = dto.Category,
-                ImageUrl = dto.ImageUrl
-            };
-
-            _context.Products.Add(product);
-            await _context.SaveChangesAsync();
-
-            dto.Id = product.Id;
-
-            return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, dto);
+                success = true,
+                data = product,
+                message = $"Product with ID {product.Id} created successfully"
+            });
         }
 
         // PUT: api/products/id
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProduct(int id, [FromBody] ProductDto dto)
+        public async Task<IActionResult> Update(int id, UpdateProductDto dto)
         {
-            if (id != dto.Id)
-                return BadRequest();
+            var success = await _service.UpdateAsync(id, dto);
+            if (!success)
+                return NotFound(new
+                {
+                    success = false,
+                    message = $"Product with ID {id} not found",
+                    id = id
+                });
 
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
-                return NotFound();
-
-            product.Name = dto.Name;
-            product.Description = dto.Description;
-            product.Price = dto.Price;
-            product.Category = dto.Category;
-            product.ImageUrl = dto.ImageUrl;
-
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return Ok(new
+            {
+                success = true,
+                message = $"Product with ID {id} updated successfully",
+                id = id
+            });
         }
 
         // DELETE: api/products/id
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
-                return NotFound();
+            var success = await _service.DeleteAsync(id);
+            if (!success)
+            {
+                return NotFound(new
+                {
+                    success = false,
+                    message = $"Product with ID {id} not found",
+                    id = id
+                });
+            }
 
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return Ok(new
+            {
+                success = true,
+                message = $"Product with ID {id} deleted successfully",
+                id = id
+            });
         }
 
 
