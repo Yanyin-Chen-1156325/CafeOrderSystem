@@ -48,6 +48,7 @@ namespace CafeOrderSystem.Api.Controllers
                         {
                             order.Status = OrderStatus.Paid;
                             order.FailureReason = null;
+                            order.StripePaymentIntentId = paymentIntent.Id;
                         }
                         else if (stripeEvent.Type == "payment_intent.payment_failed")
                         {

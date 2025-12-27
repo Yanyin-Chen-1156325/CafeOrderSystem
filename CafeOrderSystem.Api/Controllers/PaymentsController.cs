@@ -51,9 +51,9 @@ namespace CafeOrderSystem.Api.Controllers
                     Enabled = true
                 },
                 Metadata = new Dictionary<string, string>
-            {
-                { "OrderId", order.Id.ToString() }
-            }
+                {
+                    { "OrderId", order.Id.ToString() }
+                }
             };
 
             var service = new PaymentIntentService();

@@ -34,5 +34,6 @@ namespace CafeOrderSystem.Api.Models
         public OrderType Type { get; set; } = OrderType.DineIn;
         public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.Cash;
         public string? FailureReason { get; set; }
+        public string? StripePaymentIntentId { get; set; }
     }
 }
