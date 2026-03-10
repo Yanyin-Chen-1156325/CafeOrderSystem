@@ -1,0 +1,52 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: cafeorderdb
+      POSTGRES_USER: cafe
+      POSTGRES_PASSWORD: password
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cafe -d cafeorderdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: CafeOrderSystem.Api/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      # In containers we usually terminate TLS at a reverse proxy; disable redirect to avoid http->https loops.
+      UseHttpsRedirection: "false"
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=cafeorderdb;Username=cafe;Password=password"
+      # TODO: move these secrets to env / GitHub Secrets before going public
+      # JwtSettings__Issuer: "CafeOrderSystem"
+      # JwtSettings__Audience: "CafeOrderSystemClient"
+      # JwtSettings__SecretKey: "<set-me>"
+      # Stripe__SecretKey: "<set-me>"
+      # Stripe__WebhookSecret: "<set-me>"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: CafeOrderSystem.Client/Dockerfile
+      args:
+        VITE_API_BASE_URL: "/api"
+        # VITE_STRIPE_PUBLISHABLE_KEY: "<set-me>"
+    ports:
+      - "5173:80"
+    depends_on:
+      - api
+
+volumes:
+  pg_data:

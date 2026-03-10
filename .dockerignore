@@ -1,0 +1,25 @@
+# Build outputs
+**/bin/
+**/obj/
+
+# Node
+**/node_modules/
+**/dist/
+
+# Git
+.git/
+.gitignore
+
+# VS/IDE
+.vs/
+**/*.user
+**/*.suo
+
+# Local env / secrets
+**/.env
+**/.env.*
+
+# Local databases
+*.db
+*.db-wal
+*.db-shm

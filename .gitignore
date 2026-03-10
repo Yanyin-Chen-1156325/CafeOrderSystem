@@ -40,6 +40,11 @@ bld/
 # Visual Studio 2017 auto generated files
 Generated\ Files/
 
+# Local databases (SQLite)
+*.db
+*.db-wal
+*.db-shm
+
 # MSTest test Results
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
@@ -407,3 +412,9 @@ FodyWeavers.xsd
 **/appsettings.json
 **/appsettings.*.json
 !**/appsettings.*.example.json
+
+# Local
+TECH_TALK_gpt.md
+TECH_PLAN.txt
+TECH_OVERVIEW.md
+Task.txt

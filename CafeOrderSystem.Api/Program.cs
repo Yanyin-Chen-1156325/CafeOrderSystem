@@ -21,7 +21,7 @@ Stripe.StripeConfiguration.ApiKey =builder.Configuration["Stripe:SecretKey"];
 // Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -110,12 +110,18 @@ using (var scope = app.Services.CreateScope())
     var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
     var dbContext = services.GetRequiredService<AppDbContext>();
 
+    await dbContext.Database.MigrateAsync();
+
     await DbSeeder.SeedRolesAsync(roleManager);
     await DbSeeder.SeedAdminAsync(userManager);
     await DbSeeder.SeedProductsAsync(dbContext);
 }
 
-app.UseHttpsRedirection();
+var useHttpsRedirection = builder.Configuration.GetValue("UseHttpsRedirection", true);
+if (useHttpsRedirection)
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseCors("AllowAll");
 
