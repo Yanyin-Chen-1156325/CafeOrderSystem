@@ -21,6 +21,9 @@ jobs:
       - name: Checkout to the branch
         uses: actions/checkout@v4
 
+      - name: Set lowercase owner
+        run: echo "OWNER=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - name: Azure Login
         uses: azure/login@v2
         with:
@@ -38,5 +41,5 @@ jobs:
           registryPassword: ${{ secrets.CAFEWEB_REGISTRY_PASSWORD }}
           containerAppName: cafe-web
           resourceGroup: DevOpsTest
-          imageToBuild: ghcr.io/${{ secrets.CAFEWEB_REGISTRY_USERNAME }}/cafe-web:${{ github.sha }}
+          imageToBuild: ghcr.io/${{ env.OWNER }}/cafe-web:${{ github.sha }}
           buildArguments: VITE_API_BASE_URL=/api
