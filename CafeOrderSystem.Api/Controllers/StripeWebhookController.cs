@@ -1,5 +1,6 @@
 ﻿using CafeOrderSystem.Api.Data;
 using CafeOrderSystem.Api.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Stripe;
 
@@ -18,12 +19,19 @@ namespace CafeOrderSystem.Api.Controllers
             _configuration = configuration;
         }
 
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Index()
         {
             var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
             var stripeSignature = Request.Headers["Stripe-Signature"];
             var webhookSecret = _configuration["Stripe:WebhookSecret"];
+
+            if (string.IsNullOrEmpty(webhookSecret))
+                return BadRequest("Webhook error: WebhookSecret is null or empty");
+
+            if (string.IsNullOrEmpty(stripeSignature))
+                return BadRequest("Webhook error: Stripe-Signature header is missing");
 
             Event stripeEvent;
             try
