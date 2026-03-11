@@ -42,3 +42,9 @@ jobs:
           containerAppName: cafe-api
           resourceGroup: DevOpsTest
           imageToBuild: ghcr.io/${{ env.OWNER }}/cafe-api:${{ github.sha }}
+          environmentVariables: >
+            ConnectionStrings__DefaultConnection=${{ secrets.CAFEAPI_DB_CONNECTION_STRING }}
+            JwtSettings__SecretKey=${{ secrets.CAFEAPI_JWT_SECRET_KEY }}
+            Stripe__SecretKey=${{ secrets.CAFEAPI_STRIPE_SECRET_KEY }}
+            Stripe__WebhookSecret=${{ secrets.CAFEAPI_STRIPE_WEBHOOK_SECRET }}
+            ASPNETCORE_ENVIRONMENT=Production
