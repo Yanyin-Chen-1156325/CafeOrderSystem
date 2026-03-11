@@ -29,7 +29,7 @@ namespace CafeOrderSystem.Api.Services
                 },
                 Metadata = new Dictionary<string, string>
             {
-                { "orderId", order.Id.ToString() }
+                { "OrderId", order.Id.ToString() }
             }
             };
 
