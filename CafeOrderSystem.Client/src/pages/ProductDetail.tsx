@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getProductById } from "../api/productApi";
 import { addToCart } from "../api/cartApi";
+import { clearAuth } from "../utils/auth";
 
 interface Product {
   id: number;
@@ -60,7 +61,7 @@ const ProductDetail = () => {
       window.dispatchEvent(new Event("cartUpdated"));
     } catch (err: any) {
       if (err.response?.status === 401) {
-        localStorage.removeItem("token");
+        clearAuth();
         navigate("/login");
       } else {
         setCartMessage("Failed to add to cart");

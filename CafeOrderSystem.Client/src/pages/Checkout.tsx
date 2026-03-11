@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { createOrder } from "../api/orderApi";
 import { createPaymentIntent } from "../api/paymentApi";
+import { clearAuth } from "../utils/auth";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import StripePaymentForm from "../components/StripePaymentForm";
@@ -64,7 +65,7 @@ const Checkout = () => {
       console.error("Order creation error:", err);
 
       if (err.response?.status === 401) {
-        localStorage.removeItem("token");
+        clearAuth();
         navigate("/login");
       } else {
         const errorMsg =

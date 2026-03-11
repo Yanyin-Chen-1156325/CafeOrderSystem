@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCart, removeFromCart, updateCartItem } from "../api/cartApi";
+import { clearAuth } from "../utils/auth";
 
 interface CartItem {
   id: number;
@@ -54,7 +55,7 @@ const Cart = () => {
       }
     } catch (err: any) {
       if (err.response?.status === 401) {
-        localStorage.removeItem("token");
+        clearAuth();
         navigate("/login");
       } else {
         setError("Failed to load cart");

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getMyOrders } from "../api/orderApi";
+import { clearAuth } from "../utils/auth";
 
 interface OrderItem {
   productName: string;
@@ -38,7 +39,7 @@ const MyOrders = () => {
       }
     } catch (err: any) {
       if (err.response?.status === 401) {
-        localStorage.removeItem("token");
+        clearAuth();
         navigate("/login");
       } else {
         setError("Failed to load orders");

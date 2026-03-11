@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getCart } from "../api/cartApi";
+import { clearAuth } from "../utils/auth";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -8,29 +9,38 @@ const Navbar = () => {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [cartItemCount, setCartItemCount] = useState(0);
 
-  useEffect(() => {
-    // Check if user is logged in by checking for token
+  const checkAuth = () => {
     const token = localStorage.getItem("token");
-    const role = localStorage.getItem("userRole"); // "Admin" or "Customer"
+    const role = localStorage.getItem("userRole");
     setIsLoggedIn(!!token);
     setUserRole(role);
-
-    // Load cart count for Customer
     if (token && role === "Customer") {
       loadCartCount();
+    } else {
+      setCartItemCount(0);
     }
+  };
 
-    // Listen for cart updates
+  useEffect(() => {
+    checkAuth();
+
     const handleCartUpdate = () => {
+      const role = localStorage.getItem("userRole");
       if (role === "Customer") {
         loadCartCount();
       }
     };
 
+    const handleAuthChanged = () => {
+      checkAuth();
+    };
+
     window.addEventListener("cartUpdated", handleCartUpdate);
+    window.addEventListener("authChanged", handleAuthChanged);
 
     return () => {
       window.removeEventListener("cartUpdated", handleCartUpdate);
+      window.removeEventListener("authChanged", handleAuthChanged);
     };
   }, []);
 
@@ -46,10 +56,7 @@ const Navbar = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userRole");
-    setIsLoggedIn(false);
-    setUserRole(null);
+    clearAuth();
     navigate("/login");
   };
 

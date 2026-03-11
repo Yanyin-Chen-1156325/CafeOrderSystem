@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { addToCart } from "../api/cartApi";
+import { clearAuth } from "../utils/auth";
 
 interface ProductProps {
   product: {
@@ -41,8 +42,7 @@ const ProductCard = ({ product }: ProductProps) => {
       window.dispatchEvent(new Event("cartUpdated"));
     } catch (err: any) {
       if (err.response?.status === 401) {
-        // Token expired or invalid, redirect to login
-        localStorage.removeItem("token");
+        clearAuth();
         navigate("/login");
       } else {
         setMessage("Failed to add to cart");
