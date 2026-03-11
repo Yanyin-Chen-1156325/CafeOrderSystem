@@ -45,6 +45,14 @@ namespace CafeOrderSystem.Api.Data
                     throw new Exception($"Failed to create admin user: {errors}");
                 }
             }
+            else
+            {
+                var roles = await userManager.GetRolesAsync(existingAdmin);
+                if (!roles.Contains("Admin"))
+                {
+                    await userManager.AddToRoleAsync(existingAdmin, "Admin");
+                }
+            }
         }
 
         public static async Task SeedProductsAsync(AppDbContext context)

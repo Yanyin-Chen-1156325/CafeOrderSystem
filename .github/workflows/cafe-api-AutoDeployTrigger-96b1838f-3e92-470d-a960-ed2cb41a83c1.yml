@@ -61,6 +61,9 @@ jobs:
             --replace-env-vars \
               "ConnectionStrings__DefaultConnection=secretref:db-conn" \
               "JwtSettings__SecretKey=secretref:jwt-key" \
+              "JwtSettings__Issuer=CafeOrderSystem" \
+              "JwtSettings__Audience=CafeOrderSystemClient" \
+              "JwtSettings__ExpiryMinutes=60" \
               "Stripe__SecretKey=secretref:stripe-sk" \
               "Stripe__WebhookSecret=secretref:stripe-wh" \
               "ASPNETCORE_ENVIRONMENT=Production"
